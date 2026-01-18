@@ -1,0 +1,3616 @@
+[
+  {
+    "id": "00a2caa125ce1a95",
+    "type": "subflow",
+    "name": "Check API Token",
+    "info": "",
+    "category": "",
+    "in": [
+      {
+        "x": 60,
+        "y": 160,
+        "wires": [
+          {
+            "id": "22164ae3cb0e58d0"
+          }
+        ]
+      }
+    ],
+    "out": [
+      {
+        "x": 480,
+        "y": 120,
+        "wires": [
+          {
+            "id": "22164ae3cb0e58d0",
+            "port": 0
+          }
+        ]
+      },
+      {
+        "x": 480,
+        "y": 200,
+        "wires": [
+          {
+            "id": "22164ae3cb0e58d0",
+            "port": 1
+          }
+        ]
+      }
+    ],
+    "env": [],
+    "meta": {},
+    "color": "#DDAA99"
+  },
+  {
+    "id": "27ac23cbee16190e",
+    "type": "comment",
+    "z": "00a2caa125ce1a95",
+    "name": "",
+    "info": "SECURITY CRITICAL\nValidates Bearer token for all REST API endpoints.\nFail closed. No default credentials.\nAny change impacts ALL API endpoints.\n",
+    "x": 110,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "22164ae3cb0e58d0",
+    "type": "function",
+    "z": "00a2caa125ce1a95",
+    "name": "Validate Bearer Token",
+    "func": "/**\n * SUBFLOW \u2014 CHECK API TOKEN\n *\n * SAFETY CRITICAL\n * - Fail closed\n * - No default credentials\n * - Deterministic behavior only\n */\n\nconst apiToken = global.get(\"API_TOKEN\");\n\nif (!apiToken) {\n    msg.statusCode = 503;\n    msg.payload = {\n        error: \"Service Unavailable\",\n        message: \"API_TOKEN not configured\",\n        timestamp: new Date().toISOString()\n    };\n    return [null, msg];\n}\n\nconst authHeader = msg.req?.headers?.authorization;\n\nif (!authHeader || typeof authHeader !== \"string\") {\n    msg.statusCode = 401;\n    msg.payload = {\n        error: \"Unauthorized\",\n        message: \"Missing Authorization header\",\n        timestamp: new Date().toISOString()\n    };\n    return [null, msg];\n}\n\nif (!authHeader.startsWith(\"Bearer \")) {\n    msg.statusCode = 401;\n    msg.payload = {\n        error: \"Unauthorized\",\n        message: 'Authorization header must start with \"Bearer \"',\n        timestamp: new Date().toISOString()\n    };\n    return [null, msg];\n}\n\nconst providedToken = authHeader.substring(7).trim();\n\nif (providedToken !== apiToken.trim()) {\n    msg.statusCode = 401;\n    msg.payload = {\n        error: \"Unauthorized\",\n        message: \"Invalid Bearer token\",\n        timestamp: new Date().toISOString()\n    };\n    return [null, msg];\n}\n\n// Token valide \u2192 sortie 1\nreturn [msg, null];\n",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 260,
+    "y": 160,
+    "wires": [
+      [],
+      []
+    ]
+  },
+  {
+    "id": "0e7bd618862141da",
+    "type": "tab",
+    "label": "Flux Serre - Web",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "77f2bb3f2a4e6302",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "CAPTEURS \u2013 Serre",
+    "style": {
+      "stroke": "none",
+      "fill": "#e3f3d3",
+      "label": true
+    },
+    "nodes": [
+      "4ded02fdfb43cb90",
+      "98526cddb61c357d",
+      "f6d36945136e432b",
+      "3ed403128fe68d07",
+      "aa6ea2a6e95859c1",
+      "e4e112c1926b567d",
+      "34367542e55e36e5",
+      "e6db087bef5fcdfd"
+    ],
+    "x": 34,
+    "y": 819,
+    "w": 512,
+    "h": 202
+  },
+  {
+    "id": "3c73b4375f4ebbc5",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "MOTEUR \u2013 Arrosage",
+    "style": {
+      "stroke": "none",
+      "fill": "#ffefbf",
+      "label": true
+    },
+    "nodes": [
+      "0077992510379b5d",
+      "e4760975ee0d7652",
+      "b7cb5f647cb76c70",
+      "b7c756781cca8fc1"
+    ],
+    "x": 64,
+    "y": 1819,
+    "w": 502,
+    "h": 142
+  },
+  {
+    "id": "a26dc68e08b358d9",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "ACTIONNEURS \u2013 Serre",
+    "style": {
+      "stroke": "none",
+      "fill": "#dbcbe7",
+      "label": true
+    },
+    "nodes": [
+      "38575e30ccb9f68d",
+      "7bfbd6527e513b4e"
+    ],
+    "x": 654,
+    "y": 1719,
+    "w": 252,
+    "h": 182
+  },
+  {
+    "id": "b5fc5b0637014374",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "SCHEDULING \u2013 Serre",
+    "style": {
+      "label": true,
+      "stroke": "none",
+      "fill": "#d1d1d1",
+      "fill-opacity": "0.63"
+    },
+    "nodes": [
+      "391285c745520bd5",
+      "56ec7fd2285e72da",
+      "278fbaca9ba04a83",
+      "c09ab57047d2fbad",
+      "6e4b418d719f1268"
+    ],
+    "x": 34,
+    "y": 19,
+    "w": 512,
+    "h": 242
+  },
+  {
+    "id": "ae56c4e06ce9ffb1",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "INTERFACES \u2013 Zigbee2MQTT",
+    "style": {
+      "label": true,
+      "stroke": "none",
+      "fill": "#d1d1d1",
+      "fill-opacity": "0.63"
+    },
+    "nodes": [
+      "c3b075cd4b3dab6b",
+      "98c1253a6e86818a",
+      "6c86cb7a1ba309a2",
+      "43cca593f4a9b67c",
+      "f909fd08c4b801d0",
+      "e40fb61e2df58d2d",
+      "217cd7e1f584bcb2",
+      "3847e9ea5ceb127b",
+      "a2a2d6821d4deda8",
+      "c9331279029e1343",
+      "e45e9f4694f01eaf",
+      "de7ce6f284dfb84b",
+      "002590b5738f73d2",
+      "5a66ef7449f57468",
+      "f1cf986295ab95be",
+      "d9c6836485cc9148",
+      "7fe6058db91bb4a7",
+      "011fb30546b6f296",
+      "eb82afd7bd8364ee",
+      "cd73a04085112683",
+      "6f977fce37a83f38",
+      "8f748ba6b85a1383",
+      "0e494a7a59839cf9",
+      "04547456380b6c4e"
+    ],
+    "x": 54,
+    "y": 1139,
+    "w": 980,
+    "h": 542
+  },
+  {
+    "id": "39ea0e42c6c7ba11",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "CONFIG - SERRE",
+    "style": {
+      "stroke": "none",
+      "fill": "#bfdbef",
+      "fill-opacity": "0.65",
+      "label": true
+    },
+    "nodes": [
+      "d98272d848445195",
+      "45d6d6f42b8bfa36",
+      "51736c17b3a5c412",
+      "a103e8dccafbc659",
+      "c22f81753d4e7fb6",
+      "a442af09ba086622",
+      "e44b9530b7822daf",
+      "b80ce15870939d20",
+      "29aad541f5104f3e",
+      "87d38cc7e2ee9685",
+      "efdfa58abf7f181b",
+      "54c4e4aae6c6b20b",
+      "c974bcb974d75a42",
+      "7ae3b6ac55e3e2cf",
+      "ff344049e2e336b8",
+      "126bfec96a2ff2a7",
+      "c8b60b4c66f1dd97",
+      "4c1a9692e510bc61",
+      "0ebc60687ad1d18c",
+      "636459403e889f9c",
+      "98c8c92972092a8e",
+      "bd6f2188f64c27f9",
+      "601df3275f74da43",
+      "25d3b2a452013910",
+      "f5ac09cc79c11571",
+      "a9b050f7cac3cc6d",
+      "b772a2f4b0d87701",
+      "97c338c5406c52c9",
+      "401b166e83375e87",
+      "1bdf264f97a56861"
+    ],
+    "x": 34,
+    "y": 279,
+    "w": 832,
+    "h": 502
+  },
+  {
+    "id": "9cf3e781b1885754",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "MOTEUR \u2013 Climat",
+    "style": {
+      "stroke": "none",
+      "fill": "#ffefbf",
+      "label": true
+    },
+    "nodes": [
+      "86f553bf726de1ae",
+      "48d0a363a5ea2776"
+    ],
+    "x": 64,
+    "y": 1719,
+    "w": 282,
+    "h": 82
+  },
+  {
+    "id": "6cfa9c325682b211",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "CONFIG - PHASE CULTURE",
+    "style": {
+      "stroke": "none",
+      "fill": "#bfdbef",
+      "fill-opacity": "0.65",
+      "label": true
+    },
+    "nodes": [
+      "e4580c36da9a59f7",
+      "e0d9f8a9babadd85"
+    ],
+    "x": 894,
+    "y": 279,
+    "w": 412,
+    "h": 82
+  },
+  {
+    "id": "9f52c77da5ba03b2",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "MOTEUR \u2013 Culture",
+    "style": {
+      "stroke": "none",
+      "fill": "#ffefbf",
+      "label": true
+    },
+    "nodes": [
+      "3ad50f79677e98b3",
+      "1bac0e1c603b41c1",
+      "bc3e4129f93dbd21",
+      "cc8028de4fbead38",
+      "791c2f19b28911ce"
+    ],
+    "x": 894,
+    "y": 439,
+    "w": 672,
+    "h": 142
+  },
+  {
+    "id": "2e2288dc8190b239",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "MOTEUR \u2013 Failsafe",
+    "style": {
+      "stroke": "none",
+      "fill": "#ffefbf",
+      "label": true
+    },
+    "nodes": [
+      "a78dd6d49dea58b0",
+      "c8d1dcb948c248da",
+      "08fb5e584bcc4655",
+      "2680b1cd3124ae65"
+    ],
+    "x": 54,
+    "y": 1979,
+    "w": 692,
+    "h": 142
+  },
+  {
+    "id": "d565684ac61e12ea",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "CAPTEURS - S\u00e9curit\u00e9",
+    "style": {
+      "stroke": "none",
+      "fill": "#e3f3d3",
+      "label": true
+    },
+    "nodes": [
+      "387feb2b99fc4851",
+      "0d49dade1a3b26f9",
+      "f10ab11d9aa0ae25",
+      "683a5f217fcfd713",
+      "a6d753e0c667c1c7",
+      "329a07798984d6d3",
+      "5a05cb680a305525",
+      "5dd8cb7cf9bf57f1",
+      "718ec8ec2cc3c344"
+    ],
+    "x": 584,
+    "y": 819,
+    "w": 812,
+    "h": 242
+  },
+  {
+    "id": "0d4fcc0d0d2e8fb5",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "FAILSAFE \u2013 Global",
+    "style": {
+      "stroke": "none",
+      "fill": "#d1d1d1",
+      "fill-opacity": "0.63",
+      "label": true
+    },
+    "nodes": [
+      "f1ec05a194a4dae6",
+      "dee6c7727d24e5c9",
+      "535c0af16bd86a68",
+      "3abb0e39aa4b01a3",
+      "3b8c94f681fc5c9e",
+      "70e8b17b7efec0d0",
+      "8850cdde247d3e94",
+      "19a8baa32dd519fe"
+    ],
+    "x": 54,
+    "y": 2159,
+    "w": 912,
+    "h": 222
+  },
+  {
+    "id": "ddcb3a87b41196a3",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "COMMANDES WEB \u2013 Validation Failsafe",
+    "style": {
+      "stroke": "none",
+      "fill": "#ffefbe",
+      "fill-opacity": "0.5",
+      "label": true
+    },
+    "nodes": [
+      "d454101714947622",
+      "afa50bc55dde75e2",
+      "0629b813025f896c"
+    ],
+    "x": 54,
+    "y": 2419,
+    "w": 712,
+    "h": 82
+  },
+  {
+    "id": "728d4ef3dafee931",
+    "type": "group",
+    "z": "0e7bd618862141da",
+    "name": "API REST",
+    "style": {
+      "label": true,
+      "stroke": "#0070c0",
+      "fill": "#e3f3ff",
+      "fill-opacity": "0.5"
+    },
+    "nodes": [
+      "e258df11feacc26d",
+      "01888904368994ad",
+      "612fc51ab5d64298",
+      "d34d820f79330d5c",
+      "78e233f32c8520c0",
+      "4c01825ad2ea3b02",
+      "1d23a7188dd1bcad",
+      "fb71d25a206ae28e",
+      "1b200603ac586176",
+      "842332671c55873f",
+      "107cca722c6f3cf4",
+      "4906aafad927fdf6",
+      "1787fe8fa610eb44",
+      "1cc80bc8e85b7563",
+      "edc14723c2214e7a",
+      "e8bbf3f3450d1da8",
+      "c0101456ea39e3d0",
+      "1477ec3ea9eac11a",
+      "dd3d5bfbb376a08d",
+      "2550f2fbe0bdd836",
+      "3884e70e7f6a0e0e",
+      "9d6c0586d5bcb14e",
+      "07374347cb3bd7a8",
+      "d594cf3c0d14c60e",
+      "18a6971c7ab8494b",
+      "e6b2bf60498aa563",
+      "372a46a1d08a2393",
+      "ed20b210e3ef102d",
+      "6817890951a6b1ef",
+      "eedb7104dcbaff19",
+      "43a8bf4f815e6de6"
+    ],
+    "x": 24,
+    "y": 2539,
+    "w": 1282,
+    "h": 642
+  },
+  {
+    "id": "c3b075cd4b3dab6b",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Zigbee2MQTT IN",
+    "topic": "zigbee2mqtt/#",
+    "qos": "0",
+    "datatype": "json",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 160,
+    "y": 1180,
+    "wires": [
+      [
+        "98c1253a6e86818a"
+      ]
+    ]
+  },
+  {
+    "id": "98c1253a6e86818a",
+    "type": "switch",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Filtre capteur Aqara",
+    "property": "topic",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "cont",
+        "v": "aqara_temperature",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 1,
+    "x": 370,
+    "y": 1180,
+    "wires": [
+      [
+        "cd73a04085112683"
+      ]
+    ]
+  },
+  {
+    "id": "6c86cb7a1ba309a2",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Extract temp / hum",
+    "func": "// S\u00e9curit\u00e9 payload\nif (!msg.payload) return null;\n\nlet msgs = [];\n\nif (typeof msg.payload.temperature === 'number') {\n  msgs.push({\n    topic: \"serre/capteurs/air/temperature\",\n    payload: msg.payload.temperature\n  });\n\n // node.warn(\"Temp air :\" + msg.payload.temperature);\n}\n\nif (typeof msg.payload.humidity === 'number') {\n  msgs.push({\n    topic: \"serre/capteurs/air/humidity\",\n    payload: msg.payload.humidity\n  });\n //  node.warn(\"Hum air :\" + msg.payload.humidity);\n}\n\nreturn [msgs];",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 790,
+    "y": 1180,
+    "wires": [
+      [
+        "43cca593f4a9b67c"
+      ]
+    ]
+  },
+  {
+    "id": "43cca593f4a9b67c",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Serre MQTT OUT",
+    "topic": "",
+    "qos": "1",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 918,
+    "y": 1280,
+    "wires": []
+  },
+  {
+    "id": "f909fd08c4b801d0",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Z2M Lampe (state)",
+    "topic": "zigbee2mqtt/prise_lampe",
+    "qos": "2",
+    "datatype": "json",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": false,
+    "inputs": 0,
+    "x": 170,
+    "y": 1240,
+    "wires": [
+      [
+        "e40fb61e2df58d2d"
+      ]
+    ]
+  },
+  {
+    "id": "e40fb61e2df58d2d",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Extract Lampe state",
+    "func": "if (!msg.payload || !msg.payload.state) return null;\nmsg.topic = \"serre/actionneurs/lampe/state\";\nmsg.payload = msg.payload.state;\nreturn msg;",
+    "outputs": 1,
+    "x": 420,
+    "y": 1240,
+    "wires": [
+      [
+        "43cca593f4a9b67c"
+      ]
+    ]
+  },
+  {
+    "id": "217cd7e1f584bcb2",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Serre Lampe SET",
+    "topic": "serre/actionneurs/lampe/set",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": false,
+    "inputs": 0,
+    "x": 170,
+    "y": 1640,
+    "wires": [
+      [
+        "3847e9ea5ceb127b"
+      ]
+    ]
+  },
+  {
+    "id": "3847e9ea5ceb127b",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Lampe \u2192 Zigbee",
+    "func": "let cmd = (\"\" + msg.payload).toUpperCase();\n\nmsg.topic = \"zigbee2mqtt/prise_lampe/set\";\nmsg.payload = {\n  state: cmd\n};\n\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 410,
+    "y": 1640,
+    "wires": [
+      [
+        "a2a2d6821d4deda8"
+      ]
+    ]
+  },
+  {
+    "id": "a2a2d6821d4deda8",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Z2M Lampe OUT",
+    "topic": "",
+    "qos": "",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 730,
+    "y": 1640,
+    "wires": []
+  },
+  {
+    "id": "c9331279029e1343",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Z2M Extracteur (state)",
+    "topic": "zigbee2mqtt/prise_extracteur",
+    "qos": "2",
+    "datatype": "json",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": false,
+    "inputs": 0,
+    "x": 180,
+    "y": 1360,
+    "wires": [
+      [
+        "e45e9f4694f01eaf"
+      ]
+    ]
+  },
+  {
+    "id": "e45e9f4694f01eaf",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Extract Extracteur state",
+    "func": "if (!msg.payload || !msg.payload.state) return null;\n\nmsg.topic = \"serre/actionneurs/extracteur/state\";\nmsg.payload = msg.payload.state;\n\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 430,
+    "y": 1360,
+    "wires": [
+      [
+        "43cca593f4a9b67c"
+      ]
+    ]
+  },
+  {
+    "id": "de7ce6f284dfb84b",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Serre Extracteur SET",
+    "topic": "serre/actionneurs/extracteur/set",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": false,
+    "inputs": 0,
+    "x": 180,
+    "y": 1520,
+    "wires": [
+      [
+        "002590b5738f73d2"
+      ]
+    ]
+  },
+  {
+    "id": "002590b5738f73d2",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Extracteur \u2192 Zigbee",
+    "func": "let cmd = (\"\" + msg.payload).toUpperCase();\n\nmsg.topic = \"zigbee2mqtt/prise_extracteur/set\";\nmsg.payload = {\n  state: cmd\n};\n\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 420,
+    "y": 1520,
+    "wires": [
+      [
+        "5a66ef7449f57468"
+      ]
+    ]
+  },
+  {
+    "id": "5a66ef7449f57468",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Z2M Extracteur OUT",
+    "topic": "",
+    "qos": "",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 740,
+    "y": 1520,
+    "wires": []
+  },
+  {
+    "id": "f1cf986295ab95be",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Z2M Chauffage (state)",
+    "topic": "zigbee2mqtt/prise_chauffage",
+    "qos": "2",
+    "datatype": "json",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": false,
+    "inputs": 0,
+    "x": 180,
+    "y": 1300,
+    "wires": [
+      [
+        "d9c6836485cc9148"
+      ]
+    ]
+  },
+  {
+    "id": "d9c6836485cc9148",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Extract Chauffage state",
+    "func": "// CRITICAL FIX: Publish to correct chauffage topic, not extracteur\n// This ensures state updates reach the right actuator context in flow\n// Prevents state confusion between heating and extraction systems\nif (!msg.payload || !msg.payload.state) return null;\n\nmsg.topic = \"serre/actionneurs/chauffage/state\";\nmsg.payload = msg.payload.state;\n\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 430,
+    "y": 1300,
+    "wires": [
+      [
+        "43cca593f4a9b67c"
+      ]
+    ]
+  },
+  {
+    "id": "7fe6058db91bb4a7",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Serre Chauffage SET",
+    "topic": "serre/actionneurs/chauffage/set",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": false,
+    "inputs": 0,
+    "x": 180,
+    "y": 1580,
+    "wires": [
+      [
+        "011fb30546b6f296"
+      ]
+    ]
+  },
+  {
+    "id": "011fb30546b6f296",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Chauffage \u2192 Zigbee",
+    "func": "let cmd = (\"\" + msg.payload).toUpperCase();\n\nmsg.topic = \"zigbee2mqtt/prise_chauffage/set\";\nmsg.payload = {\n  state: cmd\n};\n\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 420,
+    "y": 1580,
+    "wires": [
+      [
+        "eb82afd7bd8364ee"
+      ]
+    ]
+  },
+  {
+    "id": "eb82afd7bd8364ee",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Z2M Chauffage OUT",
+    "topic": "",
+    "qos": "",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 740,
+    "y": 1580,
+    "wires": []
+  },
+  {
+    "id": "f6d36945136e432b",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "77f2bb3f2a4e6302",
+    "name": "temp_air",
+    "topic": "serre/capteurs/air/temperature",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": false,
+    "inputs": 0,
+    "x": 120,
+    "y": 980,
+    "wires": [
+      [
+        "3ed403128fe68d07"
+      ]
+    ]
+  },
+  {
+    "id": "86f553bf726de1ae",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "9cf3e781b1885754",
+    "name": "Climat engine",
+    "func": "// === FAILSAFE : priorit\u00e9 GLOBAL > SPECIFIC ===\nconst allowGlobal = flow.get('allow_global') === true;\nif (!allowGlobal) {\n    \n    return null;\n}\n\nconst allowClimat = flow.get('allow_climat') === true;\nif (!allowClimat) {\n    \n    return null;\n}\n\n// === LOGIQUE METIER ===\nlet temp = Number(msg.payload);\nlet tempMin = Number(flow.get('temp_min') ?? 18);\nlet tempMax = Number(flow.get('temp_max') ?? 28);\nlet nuit = flow.get('mode_nuit') === true;\nif (nuit) {\n  tempMin = Number(flow.get('temp_min_nuit') ?? tempMin);\n  tempMax = Number(flow.get('temp_max_nuit') ?? tempMax);\n}\n\nlet auto = flow.get('auto_mode') !== false;\nlet hyst = 1; // hyst\u00e9r\u00e9sis fixe (1 \u00b0C)\n\nif (!auto || isNaN(temp)) return null;\n\nlet hum = Number(flow.get('hum_air'));\nlet humMax = Number(flow.get('hum_max') ?? 75);\nif (isNaN(hum)) {\n  hum = -1; // humidit\u00e9 inconnue \u2192 ignor\u00e9e\n}\n\nlet out = [];\n\n// Chauffage\nlet chauffage = flow.get('chauffage') || 'OFF';\nif (temp < tempMin && chauffage === 'OFF') {\n  chauffage = 'ON';\n  out.push({ topic: 'serre/actionneurs/chauffage/set', payload: 'ON' });\n}\nif (temp > tempMin + hyst && chauffage === 'ON') {\n  chauffage = 'OFF';\n  out.push({ topic: 'serre/actionneurs/chauffage/set', payload: 'OFF' });\n}\nflow.set('chauffage', chauffage);\n\n// Extracteur\nlet extracteur = flow.get('extracteur') || 'OFF';\n\n// ON si temp\u00e9rature OU humidit\u00e9 trop \u00e9lev\u00e9e\nif (\n  extracteur === 'OFF' &&\n  (\n    temp > tempMax ||\n    (hum >= 0 && hum > humMax)\n  )\n) {\n  extracteur = 'ON';\n  out.push({\n    topic: 'serre/actionneurs/extracteur/set',\n    payload: 'ON'\n  });\n}\n\n// OFF seulement si T\u00b0 ET humidit\u00e9 OK\nif (\n  extracteur === 'ON' &&\n  temp < tempMax - hyst &&\n  (hum < 0 || hum < humMax - 5)\n) {\n  extracteur = 'OFF';\n  out.push({\n    topic: 'serre/actionneurs/extracteur/set',\n    payload: 'OFF'\n  });\n}\n\nflow.set('extracteur', extracteur);\n\nreturn out;",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 240,
+    "y": 1760,
+    "wires": [
+      [
+        "38575e30ccb9f68d"
+      ]
+    ]
+  },
+  {
+    "id": "38575e30ccb9f68d",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "a26dc68e08b358d9",
+    "name": "Climat \u2192 Actionneurs",
+    "topic": "",
+    "qos": "",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 780,
+    "y": 1760,
+    "wires": []
+  },
+  {
+    "id": "45d6d6f42b8bfa36",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "temp_min",
+    "topic": "serre/config/temp_min",
+    "qos": "0",
+    "datatype": "utf8",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 320,
+    "wires": [
+      [
+        "d98272d848445195"
+      ]
+    ]
+  },
+  {
+    "id": "d98272d848445195",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set temp min",
+    "func": "if (flow.get('culture_active')) {\n    \n    return null;\n}\n\nflow.set('temp_min', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 290,
+    "y": 320,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "51736c17b3a5c412",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "temp_max",
+    "topic": "serre/config/temp_max",
+    "qos": "0",
+    "datatype": "utf8",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 380,
+    "wires": [
+      [
+        "a103e8dccafbc659"
+      ]
+    ]
+  },
+  {
+    "id": "a103e8dccafbc659",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set temp max",
+    "func": "if (flow.get('culture_active')) {\n    \n    return null;\n}\n\n\nflow.set('temp_max', Number(msg.payload));\nreturn null;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 300,
+    "y": 380,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "c22f81753d4e7fb6",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "auto_mode",
+    "topic": "serre/config/auto_mode",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 500,
+    "y": 440,
+    "wires": [
+      [
+        "a442af09ba086622"
+      ]
+    ]
+  },
+  {
+    "id": "a442af09ba086622",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set auto mode",
+    "func": "flow.set('auto_mode', msg.payload === true || msg.payload === 'true');\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 680,
+    "y": 440,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "4ded02fdfb43cb90",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "77f2bb3f2a4e6302",
+    "name": "hum_air",
+    "topic": "serre/capteurs/air/humidity",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 860,
+    "wires": [
+      [
+        "98526cddb61c357d"
+      ]
+    ]
+  },
+  {
+    "id": "98526cddb61c357d",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "77f2bb3f2a4e6302",
+    "name": "Set hum air",
+    "func": "flow.set('hum_air', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 330,
+    "y": 860,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "b80ce15870939d20",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "hum_max",
+    "topic": "serre/config/hum_max",
+    "qos": "0",
+    "datatype": "utf8",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 440,
+    "wires": [
+      [
+        "e44b9530b7822daf"
+      ]
+    ]
+  },
+  {
+    "id": "e44b9530b7822daf",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set hum max",
+    "func": "if (flow.get('culture_active')) {\n    \n    return null;\n}\n\nflow.set('hum_max', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 290,
+    "y": 440,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "29aad541f5104f3e",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "mode_nuit",
+    "topic": "serre/config/mode_nuit",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 560,
+    "wires": [
+      [
+        "87d38cc7e2ee9685"
+      ]
+    ]
+  },
+  {
+    "id": "87d38cc7e2ee9685",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "set mode nuit",
+    "func": "// FIX: Store mode_nuit in correct context variable, not auto_mode\n// Side effect: previously was overwriting auto_mode flag, causing night mode config\n// to disable automatic climate control instead of switching temperature thresholds\nflow.set('mode_nuit', msg.payload === true || msg.payload === 'true');\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 300,
+    "y": 560,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "efdfa58abf7f181b",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "temp_min_nuit",
+    "topic": "serre/config/temp_min_nuit",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 520,
+    "y": 320,
+    "wires": [
+      [
+        "54c4e4aae6c6b20b"
+      ]
+    ]
+  },
+  {
+    "id": "54c4e4aae6c6b20b",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "set temp nuit",
+    "func": "flow.set('temp_min_nuit', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 710,
+    "y": 320,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "c974bcb974d75a42",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "temp_max_nuit",
+    "topic": "serre/config/temp_max_nuit",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 520,
+    "y": 380,
+    "wires": [
+      [
+        "7ae3b6ac55e3e2cf"
+      ]
+    ]
+  },
+  {
+    "id": "7ae3b6ac55e3e2cf",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "set temp nuit",
+    "func": "flow.set('temp_max_nuit', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 710,
+    "y": 380,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "391285c745520bd5",
+    "type": "inject",
+    "z": "0e7bd618862141da",
+    "d": true,
+    "g": "b5fc5b0637014374",
+    "name": "Mode NUIT (22:00)",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "00 22 * * *",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "true",
+    "payloadType": "bool",
+    "x": 180,
+    "y": 60,
+    "wires": [
+      [
+        "278fbaca9ba04a83"
+      ]
+    ]
+  },
+  {
+    "id": "56ec7fd2285e72da",
+    "type": "inject",
+    "z": "0e7bd618862141da",
+    "g": "b5fc5b0637014374",
+    "name": "Mode JOUR (08:00)",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "00 08 * * *",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "false",
+    "payloadType": "bool",
+    "x": 180,
+    "y": 140,
+    "wires": [
+      [
+        "278fbaca9ba04a83"
+      ]
+    ]
+  },
+  {
+    "id": "278fbaca9ba04a83",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "b5fc5b0637014374",
+    "name": "Config Mode Nuit OUT",
+    "topic": "serre/config/mode_nuit",
+    "qos": "",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 420,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "c09ab57047d2fbad",
+    "type": "inject",
+    "z": "0e7bd618862141da",
+    "g": "b5fc5b0637014374",
+    "name": "Init au d\u00e9marrage",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 170,
+    "y": 220,
+    "wires": [
+      [
+        "6e4b418d719f1268"
+      ]
+    ]
+  },
+  {
+    "id": "6e4b418d719f1268",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "b5fc5b0637014374",
+    "name": "Set Start Timestamp",
+    "func": "// Initialiser le timestamp de d\u00e9marrage Node-RED\nglobal.set('nr_start_ts', Date.now());\nnode.status({fill:'green', shape:'dot', text:'D\u00e9marrage: ' + new Date().toLocaleString()});\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 390,
+    "y": 220,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "3ed403128fe68d07",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "77f2bb3f2a4e6302",
+    "name": "Set temp air",
+    "func": "const value = Number(msg.payload);\nif (isNaN(value)) return null;\n\n// flow.set(\"temp_air\", value);\n// stockage global (partag\u00e9 API / moteurs / dashboard)\nglobal.set(\"temp_air\", value);\n\n// debug explicite\nnode.warn(\"SET global.temp_air = \" + global.get(\"temp_air\"));\n\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 330,
+    "y": 980,
+    "wires": [
+      [
+        "aa6ea2a6e95859c1"
+      ]
+    ]
+  },
+  {
+    "id": "aa6ea2a6e95859c1",
+    "type": "link out",
+    "z": "0e7bd618862141da",
+    "g": "77f2bb3f2a4e6302",
+    "name": "trigger_climat",
+    "mode": "link",
+    "links": [
+      "48d0a363a5ea2776"
+    ],
+    "x": 505,
+    "y": 980,
+    "wires": []
+  },
+  {
+    "id": "48d0a363a5ea2776",
+    "type": "link in",
+    "z": "0e7bd618862141da",
+    "g": "9cf3e781b1885754",
+    "name": "trigger_climat",
+    "links": [
+      "aa6ea2a6e95859c1"
+    ],
+    "x": 105,
+    "y": 1760,
+    "wires": [
+      [
+        "86f553bf726de1ae"
+      ]
+    ]
+  },
+  {
+    "id": "e4e112c1926b567d",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "77f2bb3f2a4e6302",
+    "name": "hum_sol",
+    "topic": "serre/capteurs/sol/humidite",
+    "qos": "0",
+    "datatype": "utf8",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 920,
+    "wires": [
+      [
+        "34367542e55e36e5"
+      ]
+    ]
+  },
+  {
+    "id": "34367542e55e36e5",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "77f2bb3f2a4e6302",
+    "name": "Set hum sol",
+    "func": "flow.set(\"hum_sol\", Number(msg.payload));\nmsg._from_hum_sol = true;\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 330,
+    "y": 920,
+    "wires": [
+      [
+        "e6db087bef5fcdfd"
+      ]
+    ]
+  },
+  {
+    "id": "ff344049e2e336b8",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "sol_min",
+    "topic": "serre/config/sol_min",
+    "qos": "0",
+    "datatype": "utf8",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 110,
+    "y": 620,
+    "wires": [
+      [
+        "126bfec96a2ff2a7"
+      ]
+    ]
+  },
+  {
+    "id": "126bfec96a2ff2a7",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set sol_min",
+    "func": "if (flow.get('culture_active')) {\n    \n    return null;\n}\n\nflow.set('sol_min', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 290,
+    "y": 620,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "c8b60b4c66f1dd97",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "sol_max",
+    "topic": "serre/config/sol_max",
+    "qos": "0",
+    "datatype": "utf8",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 680,
+    "wires": [
+      [
+        "4c1a9692e510bc61"
+      ]
+    ]
+  },
+  {
+    "id": "4c1a9692e510bc61",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set sol_max",
+    "func": "if (flow.get('culture_active')) {\n    \n    return null;\n}\nflow.set('sol_max', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 290,
+    "y": 680,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "0077992510379b5d",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "3c73b4375f4ebbc5",
+    "name": "Arrosage engine",
+    "func": "// === FAILSAFE : priorit\u00e9 GLOBAL > SPECIFIC ===\nconst allowGlobal = flow.get('allow_global') === true;\nif (!allowGlobal) {\n    \n    return null;\n}\n\n// Arrosage bloqu\u00e9 par: failsafe, culture en s\u00e9chage\nconst allowArrosage = flow.get('allow_arrosage') === true;\nif (!allowArrosage) {\n    \n    return null;\n}\n\n// === LOGIQUE METIER ===\nconst hum = flow.get('hum_sol');\nconst min = flow.get('sol_min');\nconst max = flow.get('sol_max');\n\n// S\u00e9curit\u00e9\nif (hum === undefined || min === undefined || max === undefined) {\n    return null;\n}\n\nlet arrosage = flow.get('arrosage_actif') || false;\n\nif (hum < min) {\n    arrosage = true;\n}\nelse if (hum > max) {\n    arrosage = false;\n}\n\n// m\u00e9morisation\nflow.set('arrosage_actif', arrosage);\n\n// sortie intention\nmsg.payload = arrosage ? 'ON' : 'OFF';\nmsg.topic = 'serre/arrosage/intention';\n\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 240,
+    "y": 1860,
+    "wires": [
+      [
+        "b7cb5f647cb76c70"
+      ]
+    ]
+  },
+  {
+    "id": "e6db087bef5fcdfd",
+    "type": "link out",
+    "z": "0e7bd618862141da",
+    "g": "77f2bb3f2a4e6302",
+    "name": "trigger_arrosage",
+    "mode": "link",
+    "links": [
+      "e4760975ee0d7652",
+      "387feb2b99fc4851"
+    ],
+    "x": 505,
+    "y": 920,
+    "wires": []
+  },
+  {
+    "id": "e4760975ee0d7652",
+    "type": "link in",
+    "z": "0e7bd618862141da",
+    "g": "3c73b4375f4ebbc5",
+    "name": "trigger_arrosage",
+    "links": [
+      "e6db087bef5fcdfd"
+    ],
+    "x": 105,
+    "y": 1860,
+    "wires": [
+      [
+        "0077992510379b5d"
+      ]
+    ]
+  },
+  {
+    "id": "b7cb5f647cb76c70",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "3c73b4375f4ebbc5",
+    "name": "Arrosage pulse",
+    "func": "const intention = msg.payload; // \"ON\" / \"OFF\"\n\nconst pulseDuration = flow.get('pulse_duration') || 5;\nconst pauseDuration = flow.get('pause_duration') || 60;\nconst maxPulses = flow.get('max_pulses') || 3;\n\n// \u00e9tat interne\nlet running = flow.get('pulse_running') || false;\nlet count = flow.get('pulse_count') || 0;\n\n// STOP imm\u00e9diat\nif (intention === \"OFF\") {\n    flow.set('pulse_running', false);\n    flow.set('pulse_count', 0);\n\n    return {\n        topic: \"serre/actionneurs/pompe/set\",\n        payload: \"OFF\"\n    };\n}\n\n// D\u00e9marrage pulses\nif (intention === \"ON\" && !running) {\n    running = true;\n    count = 0;\n    flow.set('pulse_running', true);\n    flow.set('pulse_count', count);\n}\n\n// Si pas actif \u2192 rien\nif (!running) return null;\n\n// S\u00e9curit\u00e9 max pulses\nif (count >= maxPulses) {\n    flow.set('pulse_running', false);\n    flow.set('pulse_count', 0);\n\n    return {\n        topic: \"serre/actionneurs/pompe/set\",\n        payload: \"OFF\"\n    };\n}\n\n// === PULSE ON ===\nflow.set('pulse_count', count + 1);\n\n// ON\nnode.send({\n    topic: \"serre/actionneurs/pompe/set\",\n    payload: \"ON\"\n});\n\n// OFF apr\u00e8s pulseDuration\nsetTimeout(() => {\n    node.send({\n        topic: \"serre/actionneurs/pompe/set\",\n        payload: \"OFF\"\n    });\n}, pulseDuration * 1000);\n\n// Prochain cycle apr\u00e8s pause\nsetTimeout(() => {\n    node.send({\n        topic: \"serre/arrosage/next\",\n        payload: \"NEXT\"\n    });\n}, (pulseDuration + pauseDuration) * 1000);\n\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 460,
+    "y": 1860,
+    "wires": [
+      [
+        "7bfbd6527e513b4e"
+      ]
+    ]
+  },
+  {
+    "id": "7bfbd6527e513b4e",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "a26dc68e08b358d9",
+    "name": "Pompe SET",
+    "topic": "serre/actionneurs/pompe/set",
+    "qos": "0",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 750,
+    "y": 1860,
+    "wires": []
+  },
+  {
+    "id": "0ebc60687ad1d18c",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "pulse_duration",
+    "topic": "serre/config/arrosage/pulse_duration",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 520,
+    "y": 500,
+    "wires": [
+      [
+        "636459403e889f9c"
+      ]
+    ]
+  },
+  {
+    "id": "636459403e889f9c",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set pulse_duration",
+    "func": "flow.set('pulse_duration', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 730,
+    "y": 500,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "98c8c92972092a8e",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "pause_duration",
+    "topic": "serre/config/arrosage/pause_duration",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 520,
+    "y": 560,
+    "wires": [
+      [
+        "bd6f2188f64c27f9"
+      ]
+    ]
+  },
+  {
+    "id": "bd6f2188f64c27f9",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set pause duration",
+    "func": "flow.set('pause_duration', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 730,
+    "y": 560,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "601df3275f74da43",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "max_pulses",
+    "topic": "serre/config/arrosage/max_pulses",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 510,
+    "y": 620,
+    "wires": [
+      [
+        "25d3b2a452013910"
+      ]
+    ]
+  },
+  {
+    "id": "25d3b2a452013910",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set max pulses",
+    "func": "flow.set('max_pulses', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 720,
+    "y": 620,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "b7c756781cca8fc1",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "3c73b4375f4ebbc5",
+    "name": "arrosage_next",
+    "topic": "serre/arrosage/next",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 250,
+    "y": 1920,
+    "wires": [
+      [
+        "b7cb5f647cb76c70"
+      ]
+    ]
+  },
+  {
+    "id": "e4580c36da9a59f7",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "6cfa9c325682b211",
+    "name": "culture_phase",
+    "topic": "serre/culture/phase",
+    "qos": "0",
+    "datatype": "utf8",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 990,
+    "y": 320,
+    "wires": [
+      [
+        "e0d9f8a9babadd85"
+      ]
+    ]
+  },
+  {
+    "id": "e0d9f8a9babadd85",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "6cfa9c325682b211",
+    "name": "Set culture phase",
+    "func": "const phase = msg.payload;\n\nflow.set('culture_phase', phase);\nflow.set('culture_active', true);\n\nnode.warn(`Culture | phase active = ${phase}`);\n\nreturn msg;   // \u2190 D\u00c9CLENCHE Culture engine\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1190,
+    "y": 320,
+    "wires": [
+      [
+        "3ad50f79677e98b3"
+      ]
+    ]
+  },
+  {
+    "id": "3ad50f79677e98b3",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "9f52c77da5ba03b2",
+    "name": "Culture engine",
+    "func": "// ==========================================\n// CULTURE ENGINE \u2014 OPTION A\n// Une phase = climat + arrosage + dur\u00e9e\n// ==========================================\n\n// Phase re\u00e7ue (MQTT serre/culture/phase)\nconst phase = msg.payload;\n\n// S\u00e9curit\u00e9\nif (!phase) {\n    node.warn(\"Culture | aucune phase re\u00e7ue\");\n    return null;\n}\n\n// ==========================================\n// PROFILS DE CULTURE\n// ==========================================\nconst profiles = {\n    germination: {\n        duration_days: 7,\n        temp_min: 22,\n        temp_max: 26,\n        hum_min: 65,\n        hum_max: 80,\n        sol_min: 40,\n        sol_max: 60,\n        auto_mode: true\n    },\n\n    vegetatif: {\n        duration_days: 21,\n        temp_min: 20,\n        temp_max: 27,\n        hum_min: 55,\n        hum_max: 70,\n        sol_min: 35,\n        sol_max: 55,\n        auto_mode: true\n    },\n\n    floraison: {\n        duration_days: 49,\n        temp_min: 18,\n        temp_max: 25,\n        hum_min: 40,\n        hum_max: 55,\n        sol_min: 30,\n        sol_max: 45,\n        auto_mode: true\n    },\n\n    drying: {\n        duration_days: 14,\n        temp_min: 18,\n        temp_max: 22,\n        hum_min: 50,\n        hum_max: 60,\n        sol_min: 0,     // pas d\u2019arrosage\n        sol_max: 0,\n        auto_mode: false\n    }\n};\n\n// ==========================================\n// VALIDATION PHASE\n// ==========================================\nif (!profiles[phase]) {\n    node.warn(`Culture | phase inconnue : ${phase}`);\n    return null;\n}\n\n// ==========================================\n// APPLICATION DU PROFIL\n// ==========================================\nconst profile = profiles[phase];\n\n// Initialisation temporelle\nconst startTs = Date.now();\n\nflow.set(\"culture_phase\", phase);\nflow.set(\"culture_active\", true);\nflow.set(\"culture_start_ts\", startTs);\nflow.set(\"culture_duration_days\", profile.duration_days);\n\nnode.warn(\n    `Culture | ${phase} d\u00e9marr\u00e9e (${profile.duration_days} jours)`\n);\n\n// ==========================================\n// PUBLICATION DES CONFIGS\n// ==========================================\nlet msgs = [];\n\nfor (const key in profile) {\n    if (key === \"duration_days\") continue;\n\n    msgs.push({\n        topic: `serre/config/${key}`,\n        payload: profile[key],\n        retain: true\n    });\n}\n\n// ==========================================\n// SORTIE\n// ==========================================\nreturn [msgs];\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1240,
+    "y": 480,
+    "wires": [
+      [
+        "1bac0e1c603b41c1"
+      ]
+    ]
+  },
+  {
+    "id": "1bac0e1c603b41c1",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "9f52c77da5ba03b2",
+    "name": "Culture \u2192 Config",
+    "topic": "",
+    "qos": "",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 1450,
+    "y": 480,
+    "wires": []
+  },
+  {
+    "id": "f5ac09cc79c11571",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "hum_min",
+    "topic": "serre/config/hum_min",
+    "qos": "0",
+    "datatype": "utf8",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 120,
+    "y": 500,
+    "wires": [
+      [
+        "a9b050f7cac3cc6d"
+      ]
+    ]
+  },
+  {
+    "id": "a9b050f7cac3cc6d",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set hum min",
+    "func": "if (flow.get('culture_active')) {\n    \n    return null;\n}\nflow.set('hum_min', Number(msg.payload));\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 290,
+    "y": 500,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "bc3e4129f93dbd21",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "9f52c77da5ba03b2",
+    "name": "Culture time status",
+    "func": "// ==========================================\n// CULTURE TIME STATUS\n// Calcule l'\u00e9tat temporel de la culture\n// ==========================================\n\nconst phase = flow.get(\"culture_phase\");\nconst startTs = flow.get(\"culture_start_ts\");\nconst durationDays = flow.get(\"culture_duration_days\");\n\nif (!phase || !startTs || !durationDays) {\n    node.warn(\"Culture status | donn\u00e9es incompl\u00e8tes\");\n    return null;\n}\n\nconst now = Date.now();\n\nconst elapsedDays = Math.floor((now - startTs) / 86400000);\nconst remainingDays = Math.max(durationDays - elapsedDays, 0);\n\nmsg.topic = \"serre/culture/status\";\nmsg.payload = {\n    phase: phase,\n    start_ts: startTs,\n    elapsed_days: elapsedDays,\n    remaining_days: remainingDays,\n    duration_days: durationDays\n};\n\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1230,
+    "y": 540,
+    "wires": [
+      [
+        "791c2f19b28911ce"
+      ]
+    ]
+  },
+  {
+    "id": "cc8028de4fbead38",
+    "type": "inject",
+    "z": "0e7bd618862141da",
+    "g": "9f52c77da5ba03b2",
+    "name": "Health Check",
+    "props": [],
+    "repeat": "21600",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 1020,
+    "y": 540,
+    "wires": [
+      [
+        "bc3e4129f93dbd21"
+      ]
+    ]
+  },
+  {
+    "id": "791c2f19b28911ce",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "9f52c77da5ba03b2",
+    "name": "Culture \u2192 Status",
+    "topic": "",
+    "qos": "",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 1450,
+    "y": 540,
+    "wires": []
+  },
+  {
+    "id": "a78dd6d49dea58b0",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "2e2288dc8190b239",
+    "name": "Failsafe engine (test)",
+    "func": "// ==========================================\n// FAILSAFE ENGINE \u2014 VERSION INTERM\u00c9DIAIRE\n// ==========================================\n\n// Par d\u00e9faut : tout autoris\u00e9\nlet allowClimat = true;\nlet allowArrosage = true;\n\n// Cas simple : phase drying \u2192 pas d\u2019arrosage\nconst culture = flow.get(\"culture_phase\");\n\nif (culture === \"drying\") {\n    allowArrosage = false;\n}\n\n// Publication STATUS\nconst statusMsg = {\n    topic: \"serre/failsafe/status\",\n    payload: {\n        active: !allowArrosage,\n        reason: culture === \"drying\" ? \"DRYING_PHASE\" : null,\n        details: culture === \"drying\" ? \"Arrosage interdit en phase drying\" : null\n    },\n    retain: true\n};\n\n// Publication ALLOW\nconst allowMsg = {\n    topic: \"serre/failsafe/allow\",\n    payload: {\n        climat: allowClimat,\n        arrosage: allowArrosage\n    },\n    retain: true\n};\n\n// \u26a0\ufe0f 2 sorties obligatoires\nreturn [statusMsg, allowMsg];\n",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 400,
+    "y": 2040,
+    "wires": [
+      [
+        "08fb5e584bcc4655"
+      ],
+      [
+        "2680b1cd3124ae65"
+      ]
+    ]
+  },
+  {
+    "id": "c8d1dcb948c248da",
+    "type": "inject",
+    "z": "0e7bd618862141da",
+    "g": "2e2288dc8190b239",
+    "name": "Trigger failsafe",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 180,
+    "y": 2040,
+    "wires": [
+      [
+        "a78dd6d49dea58b0"
+      ]
+    ]
+  },
+  {
+    "id": "08fb5e584bcc4655",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "2e2288dc8190b239",
+    "name": "Failsafe \u2192 Status",
+    "topic": "",
+    "qos": "",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 630,
+    "y": 2020,
+    "wires": []
+  },
+  {
+    "id": "2680b1cd3124ae65",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "2e2288dc8190b239",
+    "name": "Failsafe \u2192 Allow",
+    "topic": "",
+    "qos": "",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 620,
+    "y": 2080,
+    "wires": []
+  },
+  {
+    "id": "b772a2f4b0d87701",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "failsafe_allow",
+    "topic": "serre/failsafe/allow",
+    "qos": "0",
+    "datatype": "json",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 510,
+    "y": 680,
+    "wires": [
+      [
+        "97c338c5406c52c9"
+      ]
+    ]
+  },
+  {
+    "id": "97c338c5406c52c9",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set failsafe arrosage",
+    "func": "if (msg.payload && typeof msg.payload.arrosage === \"boolean\") {\n    flow.set(\"allow_arrosage\", msg.payload.arrosage);\n}\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 740,
+    "y": 680,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "401b166e83375e87",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "failsafe_allow",
+    "topic": "serre/failsafe/allow",
+    "qos": "0",
+    "datatype": "json",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 510,
+    "y": 740,
+    "wires": [
+      [
+        "1bdf264f97a56861"
+      ]
+    ]
+  },
+  {
+    "id": "1bdf264f97a56861",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "39ea0e42c6c7ba11",
+    "name": "Set failsafe climat",
+    "func": "if (msg.payload && typeof msg.payload.climat === \"boolean\") {\n    flow.set(\"allow_climat\", msg.payload.climat);\n}\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 730,
+    "y": 740,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "387feb2b99fc4851",
+    "type": "link in",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "hum_sol_value",
+    "links": [
+      "e6db087bef5fcdfd"
+    ],
+    "x": 645,
+    "y": 980,
+    "wires": [
+      [
+        "0d49dade1a3b26f9"
+      ]
+    ]
+  },
+  {
+    "id": "0d49dade1a3b26f9",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "Check hum sol alive",
+    "func": "// === FAILSAFE HUM_SOL (robuste avec red\u00e9marrage ESP32) ===\n\nconst now = Date.now();\nconst lastTs = flow.get(\"hum_sol_last_ts\");\nlet okCount = flow.get('arrosage_ok_count') || 0;\n\n// === CAS : vraie mesure hum_sol ===\nif (msg._from_hum_sol === true) {\n    flow.set(\"hum_sol_last_ts\", now);\n\n    const v = Number(msg.payload);\n    if (isNaN(v)) {\n        node.warn(\"Failsafe arrosage | hum_sol invalide\");\n        flow.set('arrosage_ok_count', 0);\n        return {\n            topic: \"serre/failsafe/allow.arrosage\",\n            payload: false,\n            retain: true\n        };\n    }\n\n    // Mesure valide : incr\u00e9mente compteur OK\n    okCount = okCount + 1;\n    flow.set('arrosage_ok_count', okCount);\n    node.warn(\"Failsafe arrosage | hum_sol OK (okCount=\" + okCount + \")\");\n\n    return {\n        topic: \"serre/failsafe/allow.arrosage\",\n        payload: okCount >= 2, // autorise seulement apr\u00e8s 2 OK cons\u00e9cutifs\n        retain: true\n    };\n}\n\n// === CAS WATCHDOG ===\nconst MAX_DELAY = 10 * 60 * 1000; // 10 minutes\n\nif (!lastTs || now - lastTs > MAX_DELAY) {\n    node.warn(\"Failsafe arrosage | hum_sol muet (timeout)\");\n    flow.set('arrosage_ok_count', 0);\n    return {\n        topic: \"serre/failsafe/allow.arrosage\",\n        payload: false,\n        retain: true\n    };\n}\n\n// === Tout va bien (pas de nouvelle mesure, mais pas de timeout) ===\n// Rester conservateur: autoriser seulement si d\u00e9j\u00e0 confirm\u00e9 par 2 mesures OK\nreturn {\n    topic: \"serre/failsafe/allow.arrosage\",\n    payload: okCount >= 2,\n    retain: true\n};\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 970,
+    "y": 980,
+    "wires": [
+      [
+        "f10ab11d9aa0ae25"
+      ]
+    ]
+  },
+  {
+    "id": "f10ab11d9aa0ae25",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "Failsafe \u2192 Allow Arrosage",
+    "topic": "",
+    "qos": "",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 1240,
+    "y": 980,
+    "wires": []
+  },
+  {
+    "id": "683a5f217fcfd713",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "Check capteur air alive",
+    "func": "// Combine availability + dernier heartbeat et ajoute une hyst\u00e9r\u00e9sis\nconst online = flow.get('capteur_air_online') === true;\nconst lastSeen = flow.get('capteur_air_last_seen') || 0;\nconst now = Date.now();\nconst ALIVE_MS = 10 * 60 * 1000; // 10 minutes\n\nconst aliveRecent = (now - lastSeen) < ALIVE_MS;\nconst alive = online || aliveRecent;\n\nlet offlineCount = flow.get('climat_offline_count') || 0;\nlet allow;\n\nif (alive) {\n  offlineCount = 0;\n  allow = true;\n} else {\n  offlineCount = offlineCount + 1;\n  // Hyst\u00e9r\u00e9sis : basculer \u00e0 false seulement apr\u00e8s 2 ticks cons\u00e9cutifs OFFLINE\n  allow = offlineCount >= 2 ? false : true;\n}\n\nflow.set('climat_offline_count', offlineCount);\n\nnode.warn(`Failsafe climat | capteur air ${allow ? 'ONLINE' : 'OFFLINE'} (offlineCount=${offlineCount})`);\nreturn {\n  topic: 'serre/failsafe/allow.climat',\n  payload: allow,\n  retain: true\n};\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 970,
+    "y": 920,
+    "wires": [
+      [
+        "a6d753e0c667c1c7",
+        "718ec8ec2cc3c344"
+      ]
+    ]
+  },
+  {
+    "id": "a6d753e0c667c1c7",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "Failsafe \u2192 Allow Climat",
+    "topic": "",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 1260,
+    "y": 920,
+    "wires": []
+  },
+  {
+    "id": "329a07798984d6d3",
+    "type": "inject",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "Tick failsafe climat",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "45",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 720,
+    "y": 880,
+    "wires": [
+      [
+        "683a5f217fcfd713",
+        "1e328a481159f6a9"
+      ]
+    ]
+  },
+  {
+    "id": "1e328a481159f6a9",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "Check debounce capteur air",
+    "func": "const lastChangeTs = flow.get('capteur_air_last_change_ts') || 0;\nconst now = Date.now();\nconst DEBOUNCE_MS = 5000; // 5 secondes\nconst pendingState = flow.get('capteur_air_pending_state');\nconst currentState = flow.get('capteur_air_online') === true;\n\n// Valider uniquement si stable et diff\u00e9rent du courant\nif (pendingState !== undefined && now - lastChangeTs >= DEBOUNCE_MS && pendingState !== currentState) {\n    flow.set('capteur_air_online', pendingState);\n    flow.set('capteur_air_pending_state', undefined);\n    node.warn('Capteur air ' + (pendingState ? 'ONLINE' : 'OFFLINE') + ' (valid\u00e9 par debounce)');\n}\n\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1000,
+    "y": 860,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "5a05cb680a305525",
+    "type": "inject",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "Watchdog hum_sol",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "300",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 730,
+    "y": 1020,
+    "wires": [
+      [
+        "0d49dade1a3b26f9"
+      ]
+    ]
+  },
+  {
+    "id": "cd73a04085112683",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Heartbeat capteur_air",
+    "func": "flow.set(\"capteur_air_last_seen\", Date.now());\nnode.warn(\"Heartbeat capteur air re\u00e7u\");\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 580,
+    "y": 1180,
+    "wires": [
+      [
+        "6c86cb7a1ba309a2"
+      ]
+    ]
+  },
+  {
+    "id": "6f977fce37a83f38",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Z2M availability capteur air",
+    "topic": "zigbee2mqtt/aqara_temperature/availability",
+    "qos": "0",
+    "datatype": "json",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 190,
+    "y": 1460,
+    "wires": [
+      [
+        "8f748ba6b85a1383",
+        "b8f8e78d2732cb14"
+      ]
+    ]
+  },
+  {
+    "id": "b8f8e78d2732cb14",
+    "type": "switch",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Filtre debug availability",
+    "property": "payload.state",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "online",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "offline",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 380,
+    "y": 1320,
+    "wires": [
+      [
+        "04547456380b6c4e"
+      ],
+      [
+        "04547456380b6c4e"
+      ]
+    ]
+  },
+  {
+    "id": "8f748ba6b85a1383",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Set capteur air availability",
+    "func": "// Accepte payload JSON {state:online|offline} ou string 'online'/'offline'\nlet state;\nif (typeof msg.payload === 'object' && msg.payload !== null) {\n    state = (msg.payload.state || '').toLowerCase();\n} else if (typeof msg.payload === 'string') {\n    state = msg.payload.trim().toLowerCase();\n}\nif (state !== 'online' && state !== 'offline') {\n    node.warn('Availability capteur air inconnue : ' + JSON.stringify(msg.payload));\n    return null;\n}\n\nconst newState = (state === 'online');\nconst currentState = flow.get('capteur_air_online') === true;\nlet pendingState = flow.get('capteur_air_pending_state');\nlet lastChangeTs = flow.get('capteur_air_last_change_ts') || 0;\nconst now = Date.now();\nconst DEBOUNCE_MS = 5000; // 5 secondes de stabilit\u00e9 requises\n\nif (pendingState === undefined) {\n    if (newState !== currentState) {\n        flow.set('capteur_air_pending_state', newState);\n        flow.set('capteur_air_last_change_ts', now);\n        node.warn('Availability change d\u00e9tect\u00e9: ' + (newState ? 'ONLINE' : 'OFFLINE') + ' (debounce d\u00e9marr\u00e9)');\n    }\n} else {\n    if (newState !== pendingState) {\n        flow.set('capteur_air_pending_state', newState);\n        flow.set('capteur_air_last_change_ts', now);\n        node.warn('Availability change re-d\u00e9tect\u00e9: ' + (newState ? 'ONLINE' : 'OFFLINE') + ' (debounce relanc\u00e9)');\n    } else {\n        if (now - lastChangeTs >= DEBOUNCE_MS && pendingState !== currentState) {\n            flow.set('capteur_air_online', pendingState);\n            flow.set('capteur_air_pending_state', undefined);\n            node.warn('Capteur air ' + (pendingState ? 'ONLINE' : 'OFFLINE') + ' (valid\u00e9 apr\u00e8s debounce)');\n        }\n    }\n}\n\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 450,
+    "y": 1460,
+    "wires": [
+      [
+        "0e494a7a59839cf9"
+      ]
+    ]
+  },
+  {
+    "id": "718ec8ec2cc3c344",
+    "type": "debug",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "debug 2",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1250,
+    "y": 860,
+    "wires": []
+  },
+  {
+    "id": "0e494a7a59839cf9",
+    "type": "link out",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "Link air availibility",
+    "mode": "link",
+    "links": [
+      "5dd8cb7cf9bf57f1"
+    ],
+    "x": 645,
+    "y": 1460,
+    "wires": []
+  },
+  {
+    "id": "5dd8cb7cf9bf57f1",
+    "type": "link in",
+    "z": "0e7bd618862141da",
+    "g": "d565684ac61e12ea",
+    "name": "link in 1",
+    "links": [
+      "0e494a7a59839cf9"
+    ],
+    "x": 775,
+    "y": 920,
+    "wires": [
+      [
+        "683a5f217fcfd713"
+      ]
+    ]
+  },
+  {
+    "id": "04547456380b6c4e",
+    "type": "debug",
+    "z": "0e7bd618862141da",
+    "g": "ae56c4e06ce9ffb1",
+    "name": "debug 3",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 640,
+    "y": 1400,
+    "wires": []
+  },
+  {
+    "id": "f1ec05a194a4dae6",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "0d4fcc0d0d2e8fb5",
+    "name": "failsafe_allow.climat",
+    "topic": "serre/failsafe/allow.climat",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 170,
+    "y": 2200,
+    "wires": [
+      [
+        "535c0af16bd86a68",
+        "8850cdde247d3e94"
+      ]
+    ]
+  },
+  {
+    "id": "dee6c7727d24e5c9",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "0d4fcc0d0d2e8fb5",
+    "name": "failsafe_allow.arrosage",
+    "topic": "serre/failsafe/allow.arrosage",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 180,
+    "y": 2260,
+    "wires": [
+      [
+        "535c0af16bd86a68",
+        "19a8baa32dd519fe"
+      ]
+    ]
+  },
+  {
+    "id": "535c0af16bd86a68",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "0d4fcc0d0d2e8fb5",
+    "name": "Failsafe global AND",
+    "func": "// Failsafe global compositionnel (AND climat & arrosage)\n// S\u00e9curit\u00e9 au d\u00e9marrage : si un \u00e9tat manque, on publie false\n\n// M\u00e9morise les \u00e9tats re\u00e7us\nif (typeof msg.payload === 'boolean') {\n    if (msg.topic === 'serre/failsafe/allow.climat') {\n        flow.set('failsafe_global_climat', msg.payload);\n    } else if (msg.topic === 'serre/failsafe/allow.arrosage') {\n        flow.set('failsafe_global_arrosage', msg.payload);\n    }\n}\n\nconst climat = flow.get('failsafe_global_climat');\nconst arrosage = flow.get('failsafe_global_arrosage');\n\n// Par d\u00e9faut (\u00e9tat manquant) : false\nlet allow = false;\nif (typeof climat === 'boolean' && typeof arrosage === 'boolean') {\n    allow = climat && arrosage;\n}\n\nreturn {\n    topic: 'serre/failsafe/allow.global',\n    payload: allow,\n    retain: true\n};\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 550,
+    "y": 2200,
+    "wires": [
+      [
+        "3abb0e39aa4b01a3"
+      ]
+    ]
+  },
+  {
+    "id": "3abb0e39aa4b01a3",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "0d4fcc0d0d2e8fb5",
+    "name": "Failsafe \u2192 Allow Global",
+    "topic": "serre/failsafe/allow.global",
+    "qos": "0",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 830,
+    "y": 2200,
+    "wires": []
+  },
+  {
+    "id": "3b8c94f681fc5c9e",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "0d4fcc0d0d2e8fb5",
+    "name": "failsafe_allow.global",
+    "topic": "serre/failsafe/allow.global",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 170,
+    "y": 2340,
+    "wires": [
+      [
+        "70e8b17b7efec0d0"
+      ]
+    ]
+  },
+  {
+    "id": "70e8b17b7efec0d0",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "0d4fcc0d0d2e8fb5",
+    "name": "Set allow_global",
+    "func": "// Stocke l'\u00e9tat du failsafe global dans le flow context\n// S\u00e9curit\u00e9: si payload non bool\u00e9en, on ignore\nif (typeof msg.payload === 'boolean') {\n    flow.set('allow_global', msg.payload);\n    if (msg.payload === false) {\n        node.warn('Failsafe GLOBAL ACTIF');\n    } else {\n        node.warn('Failsafe GLOBAL LEV\u00c9');\n    }\n}\nreturn null;\n",
+    "outputs": 0,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 470,
+    "y": 2260,
+    "wires": []
+  },
+  {
+    "id": "8850cdde247d3e94",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "0d4fcc0d0d2e8fb5",
+    "name": "Set allow_climat",
+    "func": "// Stocke l'\u00e9tat du failsafe climat dans le flow context\nif (typeof msg.payload === 'boolean') {\n    flow.set('allow_climat', msg.payload);\n}\nreturn null;\n",
+    "outputs": 0,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 470,
+    "y": 2300,
+    "wires": []
+  },
+  {
+    "id": "19a8baa32dd519fe",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "0d4fcc0d0d2e8fb5",
+    "name": "Set allow_arrosage",
+    "func": "// Stocke l'\u00e9tat du failsafe arrosage dans le flow context\nif (typeof msg.payload === 'boolean') {\n    flow.set('allow_arrosage', msg.payload);\n}\nreturn null;\n",
+    "outputs": 0,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 480,
+    "y": 2340,
+    "wires": []
+  },
+  {
+    "id": "d454101714947622",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "ddcb3a87b41196a3",
+    "name": "Web CMD IN",
+    "topic": "serre/web/cmd/#",
+    "qos": "0",
+    "datatype": "auto-detect",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": false,
+    "rh": 0,
+    "inputs": 0,
+    "x": 150,
+    "y": 2460,
+    "wires": [
+      [
+        "afa50bc55dde75e2"
+      ]
+    ]
+  },
+  {
+    "id": "afa50bc55dde75e2",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "ddcb3a87b41196a3",
+    "name": "Validate Web CMD",
+    "func": "// === VALIDATION COMMANDES WEB ===\n// Contraintes:\n// 1. Le failsafe global DOIT \u00eatre actif (allow.global === true)\n// 2. Le payload doit \u00eatre valide selon le topic\n// 3. Aucune d\u00e9pendance bloquante vers le web\n\nconst allowGlobal = flow.get('allow_global');\n\n// Bloquer si failsafe global inactif\nif (allowGlobal !== true) {\n    node.warn('Commande web refus\u00e9e (failsafe global)');\n    return null;\n}\n\n// Extraction du sous-topic (ex: serre/web/cmd/climat/temp_min \u2192 climat/temp_min)\nconst subtopic = msg.topic.replace('serre/web/cmd/', '');\n\nif (!subtopic) {\n    node.warn('Commande web refus\u00e9e (topic invalide): ' + msg.topic);\n    return null;\n}\n\n// Validation du payload\nconst payload = msg.payload;\n\n// Mapping vers topics locaux\nlet localTopic = null;\n\n// Config climat\nif (subtopic.startsWith('climat/')) {\n    const param = subtopic.replace('climat/', '');\n    const allowed = ['temp_min', 'temp_max', 'temp_min_nuit', 'temp_max_nuit', 'hum_max', 'auto_mode', 'mode_nuit'];\n    if (allowed.includes(param)) {\n        localTopic = 'serre/config/' + param;\n    }\n}\n// Config arrosage\nelse if (subtopic.startsWith('arrosage/')) {\n    const param = subtopic.replace('arrosage/', '');\n    const allowed = ['sol_min', 'sol_max', 'pulse_duration', 'pause_duration', 'max_pulses'];\n    if (allowed.includes(param)) {\n        if (param.includes('pulse') || param.includes('pause') || param.includes('max')) {\n            localTopic = 'serre/config/arrosage/' + param;\n        } else {\n            localTopic = 'serre/config/' + param;\n        }\n    }\n}\n// Actionneurs (direct override - usage avanc\u00e9)\nelse if (subtopic.startsWith('actionneur/')) {\n    const actuator = subtopic.replace('actionneur/', '');\n    const allowed = ['chauffage', 'extracteur', 'pompe', 'lampe'];\n    const parts = actuator.split('/');\n    if (parts.length === 2 && allowed.includes(parts[0]) && parts[1] === 'set') {\n        localTopic = 'serre/actionneurs/' + actuator;\n        // Validation payload ON/OFF\n        const val = String(payload).toUpperCase();\n        if (val !== 'ON' && val !== 'OFF') {\n            node.warn('Commande web refus\u00e9e (payload invalide pour actionneur): ' + payload);\n            return null;\n        }\n    }\n}\n\nif (!localTopic) {\n    node.warn('Commande web refus\u00e9e (topic non autoris\u00e9): ' + subtopic);\n    return null;\n}\n\n// Commande valid\u00e9e\nnode.warn('Commande web accept\u00e9e: ' + subtopic + ' \u2192 ' + localTopic + ' = ' + payload);\n\nreturn {\n    topic: localTopic,\n    payload: payload\n};\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 390,
+    "y": 2460,
+    "wires": [
+      [
+        "0629b813025f896c"
+      ]
+    ]
+  },
+  {
+    "id": "0629b813025f896c",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "ddcb3a87b41196a3",
+    "name": "Web CMD \u2192 Local",
+    "topic": "",
+    "qos": "0",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 650,
+    "y": 2460,
+    "wires": []
+  },
+  {
+    "id": "e258df11feacc26d",
+    "type": "http response",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "HTTP Error Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block"
+    },
+    "x": 600,
+    "y": 3140,
+    "wires": []
+  },
+  {
+    "id": "01888904368994ad",
+    "type": "http in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "GET /api/status",
+    "url": "/api/status",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 160,
+    "y": 2580,
+    "wires": [
+      [
+        "e6b2bf60498aa563"
+      ]
+    ]
+  },
+  {
+    "id": "612fc51ab5d64298",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Build Status Response",
+    "func": "// Lecture de l'\u00e9tat depuis le flow context\nconst allowGlobal = flow.get('allow_global');\nconst allowClimat = flow.get('allow_climat');\nconst allowArrosage = flow.get('allow_arrosage');\nconst culturePhase = flow.get('culture_phase') || 'unknown';\n\n// Uptime Node-RED safe\nconst startTs = global.get('nr_start_ts');\nconst uptimeSec = startTs ? Math.floor((Date.now() - startTs) / 1000) : null;\n\n// Construction de la r\u00e9ponse\nmsg.payload = {\n    uptime: uptimeSec,\n    culture_phase: culturePhase,\n    failsafe: {\n        global: allowGlobal,\n        climat: allowClimat,\n        arrosage: allowArrosage\n    },\n    timestamp: new Date().toISOString()\n};\n\nmsg.statusCode = 200;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 600,
+    "y": 2580,
+    "wires": [
+      [
+        "d34d820f79330d5c"
+      ]
+    ]
+  },
+  {
+    "id": "d34d820f79330d5c",
+    "type": "http response",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "HTTP Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block"
+    },
+    "x": 860,
+    "y": 2580,
+    "wires": []
+  },
+  {
+    "id": "78e233f32c8520c0",
+    "type": "http in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "GET /api/sensors",
+    "url": "/api/sensors",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 160,
+    "y": 2660,
+    "wires": [
+      [
+        "372a46a1d08a2393"
+      ]
+    ]
+  },
+  {
+    "id": "4c01825ad2ea3b02",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Build Sensors Response",
+    "func": "// Lecture des capteurs depuis FLOW context\nconst airTemp = flow.get('temp_air');\nconst airHum = flow.get('hum_air');\nconst soilHum = flow.get('hum_sol');\n\nmsg.payload = {\n    air: {\n        temperature: airTemp !== undefined ? airTemp : null,\n        humidity: airHum !== undefined ? airHum : null\n    },\n    soil: {\n        humidity: soilHum !== undefined ? soilHum : null\n    },\n    timestamp: new Date().toISOString()\n};\n\nmsg.statusCode = 200;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 610,
+    "y": 2660,
+    "wires": [
+      [
+        "1d23a7188dd1bcad"
+      ]
+    ]
+  },
+  {
+    "id": "1d23a7188dd1bcad",
+    "type": "http response",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "HTTP Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block"
+    },
+    "x": 860,
+    "y": 2660,
+    "wires": []
+  },
+  {
+    "id": "fb71d25a206ae28e",
+    "type": "http in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "GET /api/actuators",
+    "url": "/api/actuators",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 160,
+    "y": 2740,
+    "wires": [
+      [
+        "ed20b210e3ef102d"
+      ]
+    ]
+  },
+  {
+    "id": "1b200603ac586176",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Build Actuators Response",
+    "func": "// Return structured format with actuators array\n// Read from FLOW context where MQTT states are stored\nconst actuators = [\n    { name: 'lampe', state: flow.get('state_lampe') || 'unknown' },\n    { name: 'extracteur', state: flow.get('state_extracteur') || 'unknown' },\n    { name: 'pompe', state: flow.get('state_pompe') || 'unknown' },\n    { name: 'chauffage', state: flow.get('state_chauffage') || 'unknown' }\n];\n\nmsg.payload = {\n    actuators: actuators,\n    count: actuators.length,\n    timestamp: new Date().toISOString()\n};\n\nmsg.statusCode = 200;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 610,
+    "y": 2740,
+    "wires": [
+      [
+        "842332671c55873f"
+      ]
+    ]
+  },
+  {
+    "id": "842332671c55873f",
+    "type": "http response",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "HTTP Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block"
+    },
+    "x": 860,
+    "y": 2740,
+    "wires": []
+  },
+  {
+    "id": "107cca722c6f3cf4",
+    "type": "http in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "POST /api/actuators/:name",
+    "url": "/api/actuators/:name",
+    "method": "post",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 160,
+    "y": 2820,
+    "wires": [
+      [
+        "6817890951a6b1ef"
+      ]
+    ]
+  },
+  {
+    "id": "4906aafad927fdf6",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Validate & Publish",
+    "func": "// Validation du failsafe global\nconst allowGlobal = flow.get('allow_global');\nif (allowGlobal !== true) {\n    msg.statusCode = 403;\n    msg.payload = { \n        error: 'Forbidden', \n        message: 'Command rejected: allow_global !== true',\n        reason: 'Failsafe global is inactive',\n        timestamp: new Date().toISOString()\n    };\n    return [null, msg]; // Route vers http response (error)\n}\n\n// Extraction du nom de l'actionneur depuis l'URL\nconst actuatorName = msg.req.params.name;\nconst allowedActuators = ['lampe', 'extracteur', 'pompe', 'chauffage', 'ventilation_atmo', 'ventilation_chauffage'];\n\n// Validation du nom\nif (!allowedActuators.includes(actuatorName)) {\n    msg.statusCode = 400;\n    msg.payload = { error: 'Invalid actuator name', allowed: allowedActuators };\n    return [null, msg]; // Route vers http response (error)\n}\n\n// Validation du payload\nconst state = msg.payload.state;\nif (state !== 'ON' && state !== 'OFF') {\n    msg.statusCode = 400;\n    msg.payload = { error: 'Invalid state', message: 'State must be ON or OFF' };\n    return [null, msg];\n}\n\n// Pr\u00e9parer le message MQTT\nmsg.topic = `serre/actionneurs/${actuatorName}/set`;\nmsg.payload = state;\n\n// Pr\u00e9parer la r\u00e9ponse HTTP\nmsg._httpResponse = {\n    success: true,\n    actuator: actuatorName,\n    state: state,\n    topic: msg.topic,\n    timestamp: new Date().toISOString()\n};\n\nreturn [msg, null]; // Route vers MQTT out",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 590,
+    "y": 2820,
+    "wires": [
+      [
+        "1787fe8fa610eb44",
+        "1cc80bc8e85b7563"
+      ],
+      [
+        "edc14723c2214e7a"
+      ]
+    ]
+  },
+  {
+    "id": "1787fe8fa610eb44",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Publish to Local MQTT",
+    "topic": "",
+    "qos": "0",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 1180,
+    "y": 2720,
+    "wires": []
+  },
+  {
+    "id": "1cc80bc8e85b7563",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Build HTTP Response",
+    "func": "msg.payload = msg._httpResponse || { success: true };\nmsg.statusCode = msg.statusCode || 200;\ndelete msg._httpResponse;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 880,
+    "y": 2800,
+    "wires": [
+      [
+        "edc14723c2214e7a"
+      ]
+    ]
+  },
+  {
+    "id": "edc14723c2214e7a",
+    "type": "http response",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "HTTP Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block"
+    },
+    "x": 1160,
+    "y": 2820,
+    "wires": []
+  },
+  {
+    "id": "e8bbf3f3450d1da8",
+    "type": "http in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "POST /api/culture/phase",
+    "url": "/api/culture/phase",
+    "method": "post",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 160,
+    "y": 2900,
+    "wires": [
+      [
+        "eedb7104dcbaff19"
+      ]
+    ]
+  },
+  {
+    "id": "c0101456ea39e3d0",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Validate & Publish",
+    "func": "// Validation du failsafe global\nconst allowGlobal = flow.get('allow_global');\nif (allowGlobal !== true) {\n    msg.statusCode = 403;\n    msg.payload = { \n        error: 'Forbidden', \n        message: 'Command rejected: allow_global !== true',\n        reason: 'Failsafe global is inactive',\n        timestamp: new Date().toISOString()\n    };\n    return [null, msg]; // Route vers http response (error)\n}\n\n// Validation de la phase\nconst phase = msg.payload.phase;\nconst allowedPhases = ['germination', 'vegetatif', 'floraison', 'drying'];\n\nif (!allowedPhases.includes(phase)) {\n    msg.statusCode = 400;\n    msg.payload = { error: 'Invalid phase', allowed: allowedPhases };\n    return [null, msg];\n}\n\n// Stocker dans le context\nflow.set('culture_phase', phase);\n\n// Pr\u00e9parer le message MQTT\nmsg.topic = 'serre/culture/phase';\nmsg.payload = phase;\n\nmsg._httpResponse = {\n    success: true,\n    phase: phase,\n    topic: msg.topic,\n    timestamp: new Date().toISOString()\n};\n\nreturn [msg, null];",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 590,
+    "y": 2900,
+    "wires": [
+      [
+        "1477ec3ea9eac11a",
+        "dd3d5bfbb376a08d"
+      ],
+      [
+        "2550f2fbe0bdd836"
+      ]
+    ]
+  },
+  {
+    "id": "1477ec3ea9eac11a",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Publish to Local MQTT",
+    "topic": "",
+    "qos": "0",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 1100,
+    "y": 3040,
+    "wires": []
+  },
+  {
+    "id": "dd3d5bfbb376a08d",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Build HTTP Response",
+    "func": "msg.payload = msg._httpResponse || { success: true };\nmsg.statusCode = msg.statusCode || 200;\ndelete msg._httpResponse;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 880,
+    "y": 2880,
+    "wires": [
+      [
+        "2550f2fbe0bdd836"
+      ]
+    ]
+  },
+  {
+    "id": "2550f2fbe0bdd836",
+    "type": "http response",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "HTTP Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block"
+    },
+    "x": 1160,
+    "y": 2900,
+    "wires": []
+  },
+  {
+    "id": "3884e70e7f6a0e0e",
+    "type": "http in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "POST /api/override",
+    "url": "/api/override",
+    "method": "post",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 160,
+    "y": 2980,
+    "wires": [
+      [
+        "43a8bf4f815e6de6"
+      ]
+    ]
+  },
+  {
+    "id": "9d6c0586d5bcb14e",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Validate & Publish",
+    "func": "/**\n * API OVERRIDE \u2014 SAFETY CONTROL\n *\n * This endpoint controls failsafe states.\n * IMPORTANT: Does NOT check allow_global - this is the override/bypass endpoint!\n *\n * Security is ensured by:\n * - Bearer token authentication only\n * - Strict payload validation\n * - Limited targets\n */\n\n// Validation du target\nconst target = msg.payload?.target;\nconst allowedTargets = ['global', 'climat', 'arrosage'];\n\nif (!allowedTargets.includes(target)) {\n    msg.statusCode = 400;\n    msg.payload = {\n        error: 'Invalid target',\n        allowed: allowedTargets,\n        timestamp: new Date().toISOString()\n    };\n    return [null, msg];\n}\n\n// Validation de l'\u00e9tat\nconst state = msg.payload?.state;\nif (typeof state !== 'boolean') {\n    msg.statusCode = 400;\n    msg.payload = {\n        error: 'Invalid state',\n        message: 'State must be boolean',\n        timestamp: new Date().toISOString()\n    };\n    return [null, msg];\n}\n\n// Pr\u00e9parer la commande MQTT failsafe\nmsg.topic = `serre/failsafe/allow.${target}`;\nmsg.payload = state;\nmsg.retain = true;\n\n// IMM\u00c9DIATEMENT mettre \u00e0 jour le contexte flow\nif (target === 'global') {\n    flow.set('allow_global', state);\n    node.warn(`Override API | allow_global = ${state}`);\n} else if (target === 'climat') {\n    flow.set('allow_climat', state);\n    node.warn(`Override API | allow_climat = ${state}`);\n} else if (target === 'arrosage') {\n    flow.set('allow_arrosage', state);\n    node.warn(`Override API | allow_arrosage = ${state}`);\n}\n\n// R\u00e9ponse HTTP\nmsg._httpResponse = {\n    success: true,\n    target: target,\n    state: state,\n    topic: msg.topic,\n    timestamp: new Date().toISOString()\n};\n\nreturn [msg, null];",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 590,
+    "y": 2980,
+    "wires": [
+      [
+        "07374347cb3bd7a8",
+        "d594cf3c0d14c60e"
+      ],
+      [
+        "18a6971c7ab8494b"
+      ]
+    ]
+  },
+  {
+    "id": "07374347cb3bd7a8",
+    "type": "mqtt out",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Publish to Local MQTT",
+    "topic": "",
+    "qos": "0",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "bb5d48e46d3d908d",
+    "x": 1020,
+    "y": 3120,
+    "wires": []
+  },
+  {
+    "id": "d594cf3c0d14c60e",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Build HTTP Response",
+    "func": "msg.payload = msg._httpResponse || { success: true };\nmsg.statusCode = msg.statusCode || 200;\ndelete msg._httpResponse;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 880,
+    "y": 2960,
+    "wires": [
+      [
+        "18a6971c7ab8494b"
+      ]
+    ]
+  },
+  {
+    "id": "18a6971c7ab8494b",
+    "type": "http response",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "HTTP Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block"
+    },
+    "x": 1160,
+    "y": 2980,
+    "wires": []
+  },
+  {
+    "id": "e6b2bf60498aa563",
+    "type": "subflow:00a2caa125ce1a95",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "",
+    "x": 360,
+    "y": 2580,
+    "wires": [
+      [
+        "612fc51ab5d64298"
+      ],
+      [
+        "e258df11feacc26d"
+      ]
+    ]
+  },
+  {
+    "id": "372a46a1d08a2393",
+    "type": "subflow:00a2caa125ce1a95",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "",
+    "x": 360,
+    "y": 2660,
+    "wires": [
+      [
+        "4c01825ad2ea3b02"
+      ],
+      [
+        "e258df11feacc26d"
+      ]
+    ]
+  },
+  {
+    "id": "ed20b210e3ef102d",
+    "type": "subflow:00a2caa125ce1a95",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "",
+    "x": 360,
+    "y": 2740,
+    "wires": [
+      [
+        "1b200603ac586176"
+      ],
+      [
+        "e258df11feacc26d"
+      ]
+    ]
+  },
+  {
+    "id": "6817890951a6b1ef",
+    "type": "subflow:00a2caa125ce1a95",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "",
+    "x": 380,
+    "y": 2820,
+    "wires": [
+      [
+        "4906aafad927fdf6"
+      ],
+      [
+        "e258df11feacc26d"
+      ]
+    ]
+  },
+  {
+    "id": "eedb7104dcbaff19",
+    "type": "subflow:00a2caa125ce1a95",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "",
+    "x": 380,
+    "y": 2900,
+    "wires": [
+      [
+        "c0101456ea39e3d0"
+      ],
+      [
+        "e258df11feacc26d"
+      ]
+    ]
+  },
+  {
+    "id": "43a8bf4f815e6de6",
+    "type": "subflow:00a2caa125ce1a95",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "",
+    "x": 360,
+    "y": 2980,
+    "wires": [
+      [
+        "9d6c0586d5bcb14e"
+      ],
+      [
+        "e258df11feacc26d"
+      ]
+    ]
+  },
+  {
+    "id": "bb5d48e46d3d908d",
+    "type": "mqtt-broker",
+    "name": "",
+    "broker": "localhost",
+    "port": 1883,
+    "clientid": "",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": 4,
+    "keepalive": 60,
+    "cleansession": true,
+    "autoUnsubscribe": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthRetain": "false",
+    "birthPayload": "",
+    "birthMsg": {},
+    "closeTopic": "",
+    "closeQos": "0",
+    "closeRetain": "false",
+    "closePayload": "",
+    "closeMsg": {},
+    "willTopic": "",
+    "willQos": "0",
+    "willRetain": "false",
+    "willPayload": "",
+    "willMsg": {},
+    "userProps": "",
+    "sessionExpiry": ""
+  },
+  {
+    "id": "inject_init_failsafe",
+    "type": "inject",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Init failsafes at startup",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 1,
+    "topic": "",
+    "payload": "null",
+    "payloadType": "null",
+    "x": 160,
+    "y": 3300,
+    "wires": [
+      [
+        "fn_init_failsafe"
+      ]
+    ]
+  },
+  {
+    "id": "fn_init_failsafe",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Initialize failsafes from retained",
+    "func": "// Au d\u00e9marrage, initialiser les failsafes avec des valeurs par d\u00e9faut (false/s\u00fbr)\n// Cela permet au GET /api/status de retourner quelque chose de sens\u00e9\n\nconst allow_climat = flow.get('allow_climat');\nconst allow_arrosage = flow.get('allow_arrosage');\n\n// Si undefined, initialiser \u00e0 false (mode s\u00fbr au d\u00e9marrage)\nif (typeof allow_climat !== 'boolean') {\n    flow.set('allow_climat', false);\n    node.warn('Failsafe init | allow_climat initialized to false');\n}\n\nif (typeof allow_arrosage !== 'boolean') {\n    flow.set('allow_arrosage', false);\n    node.warn('Failsafe init | allow_arrosage initialized to false');\n}\n\n// Calculer allow_global = allow_climat AND allow_arrosage\nconst climat = flow.get('allow_climat') || false;\nconst arrosage = flow.get('allow_arrosage') || false;\nconst allow_global = climat && arrosage;\n\nflow.set('allow_global', allow_global);\nnode.warn(`Failsafe init | allow_global = ${allow_global} (climat=${climat}, arrosage=${arrosage})`);\n\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 420,
+    "y": 3300,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "fn_update_failsafe_from_override",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Update Context from MQTT",
+    "func": "// Mettre a jour le contexte flow bas\u00e9 sur le topic MQTT re\u00e7u\n// Topics: serre/failsafe/allow.global, serre/failsafe/allow.climat, serre/failsafe/allow.arrosage\n\nconst topic = msg.topic;\nconst value = msg.payload;\n\nif (typeof value !== 'boolean') {\n    node.warn('Failsafe override | payload must be boolean');\n    return null;\n}\n\nif (topic === 'serre/failsafe/allow.global') {\n    flow.set('allow_global', value);\n    node.warn(`Failsafe override | allow_global = ${value}`);\n} else if (topic === 'serre/failsafe/allow.climat') {\n    flow.set('allow_climat', value);\n    node.warn(`Failsafe override | allow_climat = ${value}`);\n} else if (topic === 'serre/failsafe/allow.arrosage') {\n    flow.set('allow_arrosage', value);\n    node.warn(`Failsafe override | allow_arrosage = ${value}`);\n}\n\nreturn null;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 420,
+    "y": 3360,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "mqtt_in_failsafe_global",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Listen allow.global",
+    "topic": "serre/failsafe/allow.global",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 160,
+    "y": 3360,
+    "wires": [
+      [
+        "fn_update_failsafe_from_override"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_failsafe_climat",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Listen allow.climat",
+    "topic": "serre/failsafe/allow.climat",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 160,
+    "y": 3400,
+    "wires": [
+      [
+        "fn_update_failsafe_from_override"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_failsafe_arrosage",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Listen allow.arrosage",
+    "topic": "serre/failsafe/allow.arrosage",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 160,
+    "y": 3440,
+    "wires": [
+      [
+        "fn_update_failsafe_from_override"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_state_lampe",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Listen lampe state",
+    "topic": "serre/actionneurs/lampe/state",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 160,
+    "y": 3500,
+    "wires": [
+      [
+        "fn_store_state_lampe"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_state_extracteur",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Listen extracteur state",
+    "topic": "serre/actionneurs/extracteur/state",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 160,
+    "y": 3540,
+    "wires": [
+      [
+        "fn_store_state_extracteur"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_state_pompe",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Listen pompe state",
+    "topic": "serre/actionneurs/pompe/state",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 160,
+    "y": 3580,
+    "wires": [
+      [
+        "fn_store_state_pompe"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_state_chauffage",
+    "type": "mqtt in",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Listen chauffage state",
+    "topic": "serre/actionneurs/chauffage/state",
+    "qos": "2",
+    "datatype": "auto",
+    "broker": "bb5d48e46d3d908d",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 160,
+    "y": 3620,
+    "wires": [
+      [
+        "fn_store_state_chauffage"
+      ]
+    ]
+  },
+  {
+    "id": "fn_store_state_lampe",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Store lampe state",
+    "func": "flow.set('state_lampe', String(msg.payload));\nreturn null;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 400,
+    "y": 3500,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "fn_store_state_extracteur",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Store extracteur state",
+    "func": "flow.set('state_extracteur', String(msg.payload));\nreturn null;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 400,
+    "y": 3540,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "fn_store_state_pompe",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Store pompe state",
+    "func": "flow.set('state_pompe', String(msg.payload));\nreturn null;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 400,
+    "y": 3580,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "fn_store_state_chauffage",
+    "type": "function",
+    "z": "0e7bd618862141da",
+    "g": "728d4ef3dafee931",
+    "name": "Store chauffage state",
+    "func": "flow.set('state_chauffage', String(msg.payload));\nreturn null;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 400,
+    "y": 3620,
+    "wires": [
+      []
+    ]
+  }
+]

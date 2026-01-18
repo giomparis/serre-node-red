@@ -1,0 +1,21 @@
+meta {
+  name: POST Actuator Command
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/api/actuators/pompe
+  body: json
+}
+
+headers {
+  Authorization: Bearer {{api_token}}
+  Content-Type: application/json
+}
+
+body {
+  {
+    "state": "ON"
+  }
+}

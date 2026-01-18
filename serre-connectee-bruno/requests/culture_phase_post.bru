@@ -1,0 +1,21 @@
+meta {
+  name: POST Culture Phase
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/api/culture/phase
+  body: json
+}
+
+headers {
+  Authorization: Bearer {{api_token}}
+  Content-Type: application/json
+}
+
+body {
+  {
+    "phase": "germination"
+  }
+}

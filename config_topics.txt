@@ -1,0 +1,17 @@
+Nodes utilisant un topic serre/config/
+
+1) temp_min (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/temp_min | Retain: n/a (reception) | Topic: fixe
+2) temp_max (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/temp_max | Retain: n/a (reception) | Topic: fixe
+3) auto_mode (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/auto_mode | Retain: n/a (reception) | Topic: fixe
+4) hum_max (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/hum_max | Retain: n/a (reception) | Topic: fixe
+5) mode_nuit (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/mode_nuit | Retain: n/a (reception) | Topic: fixe
+6) temp_min_nuit (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/temp_min_nuit | Retain: n/a (reception) | Topic: fixe
+7) temp_max_nuit (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/temp_max_nuit | Retain: n/a (reception) | Topic: fixe
+8) (mqtt out) | Groupe: SCHEDULING – Serre | Topic: serre/config/mode_nuit | Retain: true | Topic: fixe
+9) sol_min (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/sol_min | Retain: n/a (reception) | Topic: fixe
+10) sol_max (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/sol_max | Retain: n/a (reception) | Topic: fixe
+11) pulse_duration (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/arrosage/pulse_duration | Retain: n/a (reception) | Topic: fixe
+12) pause_duration (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/arrosage/pause_duration | Retain: n/a (reception) | Topic: fixe
+13) max_pulses (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/arrosage/max_pulses | Retain: n/a (reception) | Topic: fixe
+14) Culture engine (function) | Groupe: MOTEUR – Culture | Topic: serre/config/${key} | Retain: true (chaque message) | Topic: dynamique
+15) hum_min (mqtt in) | Groupe: CONFIG - SERRE | Topic: serre/config/hum_min | Retain: n/a (reception) | Topic: fixe

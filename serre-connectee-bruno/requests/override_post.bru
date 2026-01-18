@@ -1,0 +1,22 @@
+meta {
+  name: POST Override Failsafe
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{base_url}}/api/override
+  body: json
+}
+
+headers {
+  Authorization: Bearer {{api_token}}
+  Content-Type: application/json
+}
+
+body {
+  {
+    "target": "global",
+    "state": true
+  }
+}

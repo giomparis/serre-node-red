@@ -1,0 +1,13 @@
+meta {
+  name: GET Sensors
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/api/sensors
+}
+
+headers {
+  Authorization: Bearer {{api_token}}
+}

@@ -1,0 +1,13 @@
+meta {
+  name: GET Actuators
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/api/actuators
+}
+
+headers {
+  Authorization: Bearer {{api_token}}
+}

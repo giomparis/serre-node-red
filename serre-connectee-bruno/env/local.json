@@ -1,0 +1,7 @@
+{
+  "name": "local",
+  "values": [
+    { "key": "base_url", "value": "http://localhost:1880", "enabled": true },
+    { "key": "api_token", "value": "SUPER_SECRET_TOKEN", "enabled": true }
+  ]
+}
